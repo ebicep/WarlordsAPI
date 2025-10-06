@@ -26,8 +26,7 @@ export class ComputeService {
     }
 
     async getAllSortedStats(stat: string, mappedPaths: string[]): Promise<SortedPlayerStats> {
-        // const allPlayers = await this.playerRepo.getAll();
-        const allPlayers = [(await this.playerRepo.getByUUID("5a8046c6-731b-429f-a121-7f3da033fabc"))!];
+        const allPlayers = await this.playerRepo.getAll();
         console.log("Fetched " + allPlayers.length + " players from database.");
         const mappedPlayers: Map<string, number> = new Map(
             allPlayers.map(value => {

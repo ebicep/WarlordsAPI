@@ -1,7 +1,5 @@
-import {Collection, Db, type Document, MongoClient, type WithId} from "mongodb";
-import {COLLECTIONS, DATABASES} from "./enums.js";
-
-import {sumKeyAtPath} from "../services/compute.utils.js";
+import {Db, MongoClient} from "mongodb";
+import {Database} from "./enums.js";
 
 export let db: Db;
 
@@ -15,7 +13,7 @@ export async function connect() {
     await client.connect();
     console.log("Connected to MongoDB");
 
-    db = client.db(DATABASES.WARLORDS);
+    db = client.db(Database.Warlords);
     // const collection: Collection = db.collection(COLLECTIONS.PLAYERS_INFORMATION);
     //
     // const docs: WithId<Document>[] = await collection.find().toArray();

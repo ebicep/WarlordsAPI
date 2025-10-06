@@ -1,39 +1,20 @@
 import {type Request, Router} from "express";
-import {PlayerRepository} from "../respositories/player.repository.js";
-import {COLLECTIONS} from "../db/enums.js";
-import {db} from "../db/connection.js";
-import {ComputeService} from "../services/compute.service.js";
 import {z} from "zod";
-import {validate} from "../middleware/validationMiddleware.js";
+import {PlayersInformationKeySchema, PlayersInformationSchema} from "../db/enums.js";
+import type {ParamsDictionary} from "express-serve-static-core";
 import {
     getLeaderboardPaths,
     getLeaderboardStatPaths,
     type LeaderboardPaths,
     type LeaderboardStatPaths
 } from "../config/leaderboardPaths.js";
-import type {ParamsDictionary} from 'express-serve-static-core';
 import {collectArrays, navigateJson} from "../utils/utils.js";
+import {PlayerRepository} from "../respositories/player.repository.js";
+import {db} from "../db/connection.js";
+import {ComputeService} from "../services/compute.service.js";
+import {validate} from "../middleware/validationMiddleware.js";
 
 const router = Router();
-
-const PlayerStatsParamsSchema = z.object({
-    uuid: z.uuid()
-})
-
-type PlayerStatsParams = z.infer<typeof PlayerStatsParamsSchema>;
-
-router.get("/stats/:uuid", validate({
-    params: PlayerStatsParamsSchema
-}), async (req: Request<PlayerStatsParams>, res) => {
-    const {uuid} = req.params;
-    const repository: PlayerRepository = new PlayerRepository(db, COLLECTIONS.PLAYERS_INFORMATION);
-    const service: ComputeService = new ComputeService(repository);
-    const stats = await service.getPlayerStats(uuid);
-    res.json({
-        success: true,
-        data: stats
-    });
-});
 
 const LeaderboardParamsSchema = z.object({
     stat: z.string(),
@@ -44,7 +25,7 @@ const LeaderboardParamsSchema = z.object({
 type LeaderboardParams = z.infer<typeof LeaderboardParamsSchema>;
 
 const LeaderboardQuery = z.object({
-    timeframe: z.enum(getLeaderboardPaths()["timeframes"]).optional().default('lifetime'),
+    timeframe: PlayersInformationKeySchema,
     // offset: z.coerce.number().int().nonnegative().optional().default(0)
 });
 
@@ -104,7 +85,7 @@ async function handleLeaderboardStats(req: Request<LeaderboardParams & ParamsDic
                 .join(".")
         )
 
-    const repository: PlayerRepository = new PlayerRepository(db, COLLECTIONS.PLAYERS_INFORMATION);
+    const repository: PlayerRepository = new PlayerRepository(db, PlayersInformationSchema.parse(timeframe));
     const service: ComputeService = new ComputeService(repository);
     const stats = Object.fromEntries(await service.getAllSortedStats(mappedStat, matchingMappedStatPaths));
 
