@@ -1,0 +1,66 @@
+{
+  "categories": {
+    "pvp": {
+      "competitive": {
+        "ctf": [
+          "flags-captured",
+          "flags-returned"
+        ]
+      },
+      "public": {
+        "ctf": [
+          "flags-captured",
+          "flags-returned"
+        ]
+      }
+    },
+    "pve": {
+      "wave-defense": [
+        "waves-cleared",
+        "clear-rate",
+        "fastest-win",
+        "highest-wave-cleared"
+      ],
+      "onslaught": [
+        "average-time-lived",
+        "longest-time-lived"
+      ]
+    }
+  },
+  "universal_stats": [
+    "wins",
+    "losses",
+    "plays",
+    "kills",
+    "assists",
+    "deaths",
+    "damage",
+    "healing",
+    "absorbed"
+  ],
+  "timeframes": [
+    "lifetime",
+    "monthly",
+    "weekly",
+    "daily"
+  ],
+  "mappings": {
+    "pvp": "",
+    "competitive": "comp_stats",
+    "public": "public_queue_stats",
+    "ctf": "ctf_stats",
+    "pve": "pve_stats",
+    "wave-defense": "wave_defense_stats",
+    "onslaught": "onslaught_stats"
+  },
+  "stat_mappings": {
+    "flags-captured": "flags_captured",
+    "flags-returned": "flags_returned",
+    "waves-cleared": "waves_cleared",
+    "clear-rate": "clear_rate",
+    "fastest-win": "fastest_win",
+    "highest-wave-cleared": "highest_wave_cleared",
+    "average-time-lived": "average_time_lived",
+    "longest-time-lived": "longest_time_lived"
+  }
+}
