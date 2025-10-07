@@ -1,6 +1,6 @@
 import {type Request, Router} from "express";
 import {z} from "zod";
-import {PlayersInformationKeySchema, PlayersInformationSchema} from "../db/enums.js";
+import {getCollectionNameFromValue, PlayersInformationKeySchema} from "../db/enums.js";
 import type {ParamsDictionary} from "express-serve-static-core";
 import {
     getLeaderboardPaths,
@@ -26,6 +26,7 @@ type LeaderboardParams = z.infer<typeof LeaderboardParamsSchema>;
 
 const LeaderboardQuery = z.object({
     timeframe: PlayersInformationKeySchema,
+    // limit: z.coerce.number().int().min(1).max(50).optional().default(30),
     // offset: z.coerce.number().int().nonnegative().optional().default(0)
 });
 
@@ -85,7 +86,7 @@ async function handleLeaderboardStats(req: Request<LeaderboardParams & ParamsDic
                 .join(".")
         )
 
-    const repository: PlayerRepository = new PlayerRepository(db, PlayersInformationSchema.parse(timeframe));
+    const repository: PlayerRepository = new PlayerRepository(db, getCollectionNameFromValue(timeframe));
     const service: ComputeService = new ComputeService(repository);
     const stats = Object.fromEntries(await service.getAllSortedStats(mappedStat, matchingMappedStatPaths));
 

@@ -6,11 +6,30 @@ export const Database = {
 } as const;
 
 export const PlayersInformationCollection = {
-    Lifetime: "Players_Information",
-    Monthly: "Players_Information_Monthly",
-    Weekly: "Players_Information_Weekly",
-    Daily: "Players_Information_Daily",
+    Lifetime: "Lifetime",
+    Monthly: "Monthly",
+    Weekly: "Weekly",
+    Daily: "Daily",
 } as const;
+
+export function getCollectionNameFromValue(collection: keyof typeof PlayersInformationCollection): string {
+    return getCollectionNameFromKey(PlayersInformationSchema.parse(collection));
+}
+
+function getCollectionNameFromKey(collection: keyof typeof PlayersInformationCollection): string {
+    switch (collection) {
+        case PlayersInformationCollection.Lifetime:
+            return "Players_Information";
+        case PlayersInformationCollection.Monthly:
+            return "Players_Information_Monthly";
+        case PlayersInformationCollection.Weekly:
+            return "Players_Information_Weekly";
+        case PlayersInformationCollection.Daily:
+            return "Players_Information_Daily";
+        default:
+            throw new Error("Invalid collection");
+    }
+}
 
 export const PlayersInformationKeySchema = zodEnumMapCaseInsensitive(PlayersInformationCollection, "Lifetime");
 
@@ -38,12 +57,3 @@ export function zodEnumMapCaseInsensitive<T extends Record<string, string>>(
             return obj[matchedKey];
         });
 }
-
-console.log(PlayersInformationSchema.parse("Lifetime"));
-// → "Players_Information"
-
-console.log(PlayersInformationSchema.parse("WEEKLY"));
-// → "Players_Information_Weekly"
-
-console.log(PlayersInformationSchema.parse(undefined));
-// → "Players_Information"
