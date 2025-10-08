@@ -1,28 +1,14 @@
 import type {PlayerRepository} from "../respositories/player.repository.js";
-import type {Document, InferIdType} from "mongodb";
-import {sumKeyAtPath} from "./compute.utils.js";
+import {sumKeyAtPath} from "./leaderboard.utils.js";
 
-type PlayerStats = Record<string, any> & { _id: string };
 type SortedPlayerStats = Map<string, number>;
 
-export class ComputeService {
+export class LeaderboardService {
 
     constructor(
         private playerRepo: PlayerRepository
     ) {
 
-    }
-
-    async getPlayerStats(uuid: string): Promise<PlayerStats | null> {
-        const player: (Document & { _id: InferIdType<Document> }) | null = await this.playerRepo.getByUUID(uuid);
-        if (!player) {
-            return null;
-        }
-
-        return {
-            ...player,
-            _id: player._id.toString()
-        };
     }
 
     async getAllSortedStats(stat: string, mappedPaths: string[]): Promise<SortedPlayerStats> {

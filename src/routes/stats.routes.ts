@@ -1,10 +1,10 @@
 import {type Request, Router} from "express";
 import {PlayerRepository} from "../respositories/player.repository.js";
 import {PlayersInformationCollection} from "../db/enums.js";
-import {db} from "../db/connection.js";
-import {ComputeService} from "../services/compute.service.js";
+import {getDB} from "../db/connection.js";
 import {z} from "zod";
 import {validate} from "../middleware/validationMiddleware.js";
+import {StatsService} from "../services/stats.service.js";
 
 const router = Router();
 
@@ -18,8 +18,8 @@ router.get("/stats/:uuid", validate({
     params: PlayerStatsParamsSchema
 }), async (req: Request<PlayerStatsParams>, res) => {
     const {uuid} = req.params;
-    const repository: PlayerRepository = new PlayerRepository(db, PlayersInformationCollection.Lifetime);
-    const service: ComputeService = new ComputeService(repository);
+    const repository: PlayerRepository = new PlayerRepository(getDB(), PlayersInformationCollection.Lifetime);
+    const service: StatsService = new StatsService(repository);
     const stats = await service.getPlayerStats(uuid);
     res.json({
         success: true,

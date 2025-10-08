@@ -1,7 +1,8 @@
 import express, {type ErrorRequestHandler} from "express";
 import stats from "./routes/stats.routes.js";
 import leaderboards from "./routes/leaderboard.routes.js";
-import {connect} from "./db/connection.js";
+import {connectMongo} from "./db/connection.js";
+import {connectRedis} from "./cache/redis.js";
 
 const app = express();
 app.use(express.json());
@@ -12,6 +13,7 @@ app.use(((err, req, res, next) => {
     res.status(err.statusCode || 500).json({error: err.message || "Internal Server Error"});
 }) as ErrorRequestHandler);
 
-await connect()
+await connectMongo()
+await connectRedis()
 
 export default app;

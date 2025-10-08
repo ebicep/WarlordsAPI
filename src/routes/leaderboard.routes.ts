@@ -10,8 +10,8 @@ import {
 } from "../config/leaderboardPaths.js";
 import {collectArrays, navigateJson} from "../utils/utils.js";
 import {PlayerRepository} from "../respositories/player.repository.js";
-import {db} from "../db/connection.js";
-import {ComputeService} from "../services/compute.service.js";
+import {getDB} from "../db/connection.js";
+import {LeaderboardService} from "../services/leaderboard.service.js";
 import {validate} from "../middleware/validationMiddleware.js";
 
 const router = Router();
@@ -72,6 +72,7 @@ async function handleLeaderboardStats(req: Request<LeaderboardParams & ParamsDic
         });
         return;
     }
+    // TODO MOVE LOGIC TO SERVICE LAYER
     const mappedStat = stat_mappings[stat] !== undefined ? stat_mappings[stat] : stat;
     const statPath = path.join(".");
     const mappedStatPath = path
@@ -86,19 +87,13 @@ async function handleLeaderboardStats(req: Request<LeaderboardParams & ParamsDic
                 .join(".")
         )
 
-    const repository: PlayerRepository = new PlayerRepository(db, getCollectionNameFromValue(timeframe));
-    const service: ComputeService = new ComputeService(repository);
+    const repository: PlayerRepository = new PlayerRepository(getDB(), getCollectionNameFromValue(timeframe));
+    const service: LeaderboardService = new LeaderboardService(repository);
     const stats = Object.fromEntries(await service.getAllSortedStats(mappedStat, matchingMappedStatPaths));
 
     res.json({
         success: true,
-        data: {
-            "stat": stat,
-            "stat-path": statPath,
-            "mapped-stat-path": mappedStatPath,
-            "mapped-stat-paths": matchingMappedStatPaths,
-            "stats": stats
-        }
+        data: stats
     });
 }
 
@@ -113,6 +108,8 @@ router.get("/leaderboards/:stat/*path", validate({
     query: LeaderboardQuery
 }), handleLeaderboardStats);
 
+
+// TODO FIX
 router.get("/leaderboards/paths", validate({query: LeaderboardQuery}), async (req, res) => {
     let leaderboardPaths: LeaderboardPaths = getLeaderboardPaths();
     res.json({

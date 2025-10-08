@@ -1,9 +1,16 @@
 import {Db, MongoClient} from "mongodb";
 import {Database} from "./enums.js";
 
-export let db: Db;
+let db: Db | null = null;
 
-export async function connect() {
+export function getDB(): Db {
+    if (!db) {
+        throw new Error("DB not initialized");
+    }
+    return db;
+}
+
+export async function connectMongo() {
     if (!process.env.MONGO_URI) {
         console.error("MONGO_URI is not defined in environment variables.");
         return;
@@ -14,10 +21,4 @@ export async function connect() {
     console.log("Connected to MongoDB");
 
     db = client.db(Database.Warlords);
-    // const collection: Collection = db.collection(COLLECTIONS.PLAYERS_INFORMATION);
-    //
-    // const docs: WithId<Document>[] = await collection.find().toArray();
-    // docs.forEach(value => {
-    //     console.log(value["name"] + " = " + sumKeyAtPath(value, "comp_stats", "kills"));
-    // })
 }
