@@ -81,6 +81,8 @@ function loadLeaderboardPaths() {
     leaderboardPaths = loadConfigFile<LeaderboardPaths>("leaderboard_paths.json");
     leaderboardStatPaths = invertSchema(leaderboardPaths);
     loaded = true;
+    console.log("Loaded leaderboard paths:", leaderboardPaths);
+    console.log("Loaded leaderboard stat paths:", leaderboardStatPaths);
 }
 
 export function getLeaderboardPaths(): LeaderboardPaths {

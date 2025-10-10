@@ -40,56 +40,14 @@ type LeaderboardQuery = z.infer<typeof LeaderboardQuery>;
 async function handleLeaderboardStats(req: Request<LeaderboardParams & ParamsDictionary, any, any, LeaderboardQuery>, res: any) {
     const {stat, path} = req.params;
     const {timeframe} = req.query;
-    const {categories, timeframes, universal_stats, mappings, stat_mappings}: LeaderboardPaths = getLeaderboardPaths();
-    const leaderboardStatPaths: LeaderboardStatPaths = getLeaderboardStatPaths();
-    if (path.length > 0) {
-        const validObject: string[] | undefined = navigateJson(categories, path);
-        if (validObject === undefined) {
-            res.status(400).json({
-                success: false,
-                error: "Invalid path"
-            });
-            return;
-        }
-        const validStats: string[] = collectArrays(validObject);
-        validStats.push(...universal_stats);
-        if (!validStats.includes(stat)) {
-            res.status(400).json({
-                success: false,
-                error: "Invalid stat for the given path"
-            });
-            return;
-        }
+    const {valid, error} = validateLeaderboardPath(stat, path);
+    if (!valid) {
+        return res.status(400).json({success: false, error});
     }
-    let statPaths: string[] | undefined = leaderboardStatPaths[stat];
-    if (universal_stats.includes(stat)) {
-        statPaths = leaderboardStatPaths["universal"];
-    }
-    if (!statPaths) {
-        res.status(400).json({
-            success: false,
-            error: "Invalid stat"
-        });
-        return;
-    }
-    // TODO MOVE LOGIC TO SERVICE LAYER
-    const mappedStat = stat_mappings[stat] !== undefined ? stat_mappings[stat] : stat;
-    const statPath = path.join(".");
-    const mappedStatPath = path
-        .map(str => mappings[str] !== undefined ? mappings[str] : str)
-        .filter(str => str !== "")
-        .join(".")
-    const matchingMappedStatPaths = statPaths
-        .filter(p => p.startsWith(statPath))
-        .map(str =>
-            str.split(".").map(str => mappings[str] !== undefined ? mappings[str] : str)
-                .filter(str => str !== "")
-                .join(".")
-        )
 
     const repository: PlayerRepository = new PlayerRepository(getDB(), getCollectionNameFromValue(timeframe));
     const service: LeaderboardService = new LeaderboardService(repository);
-    const stats = Object.fromEntries(await service.getAllSortedStats(mappedStat, matchingMappedStatPaths));
+    const stats = Object.fromEntries(await service.getLeaderboardStats(stat, path));
 
     res.json({
         success: true,
@@ -125,5 +83,22 @@ router.get("/leaderboards/stat-paths", validate({query: LeaderboardQuery}), asyn
         data: leaderboardStatPaths
     });
 });
+
+function validateLeaderboardPath(stat: string, path: string[]): { valid: boolean; error?: string } {
+    const {categories, universal_stats} = getLeaderboardPaths();
+    const validObject = navigateJson(categories, path);
+    if (!validObject) {
+        return {valid: false, error: "Invalid path"};
+    }
+
+    const validStats = collectArrays(validObject);
+    validStats.push(...universal_stats);
+    if (!validStats.includes(stat)) {
+        return {valid: false, error: "Invalid stat for the given path"};
+    }
+
+    return {valid: true};
+}
+
 
 export default router;
