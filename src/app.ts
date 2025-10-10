@@ -10,7 +10,10 @@ app.use("/api", stats);
 app.use("/api", leaderboards);
 app.use(((err, req, res, next) => {
     console.error(err);
-    res.status(err.statusCode || 500).json({error: err.message || "Internal Server Error"});
+    res.status(err.statusCode || 500).json({
+        success: false,
+        error: err.message || "Internal Server Error",
+    });
 }) as ErrorRequestHandler);
 
 await connectMongo()
