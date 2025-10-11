@@ -3,9 +3,11 @@ import stats from "./stats/stats.routes.js";
 import leaderboards from "./leaderboards/leaderboard.routes.js";
 import {connectMongo} from "./db/connection.js";
 import {connectRedis} from "./cache/redis.js";
+import compression from 'compression';
 
 const app = express();
 app.use(express.json());
+app.use(compression({threshold: 0}));
 app.use("/api", stats);
 app.use("/api", leaderboards);
 app.use(((err, req, res, next) => {
