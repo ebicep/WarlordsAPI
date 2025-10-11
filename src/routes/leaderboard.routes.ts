@@ -55,19 +55,6 @@ async function handleLeaderboardStats(req: Request<LeaderboardParams & ParamsDic
     });
 }
 
-router.get("/leaderboards/:stat", validate({
-    params: LeaderboardParamsSchema,
-    query: LeaderboardQuery
-}), handleLeaderboardStats);
-
-
-router.get("/leaderboards/:stat/*path", validate({
-    params: LeaderboardParamsSchema,
-    query: LeaderboardQuery
-}), handleLeaderboardStats);
-
-
-// TODO FIX
 router.get("/leaderboards/paths", validate({query: LeaderboardQuery}), async (req, res) => {
     let leaderboardPaths: LeaderboardPaths = getLeaderboardPaths();
     res.json({
@@ -83,6 +70,16 @@ router.get("/leaderboards/stat-paths", validate({query: LeaderboardQuery}), asyn
         data: leaderboardStatPaths
     });
 });
+
+router.get("/leaderboards/:stat", validate({
+    params: LeaderboardParamsSchema,
+    query: LeaderboardQuery
+}), handleLeaderboardStats);
+
+router.get("/leaderboards/:stat/*path", validate({
+    params: LeaderboardParamsSchema,
+    query: LeaderboardQuery
+}), handleLeaderboardStats);
 
 function validateLeaderboardPath(stat: string, path: string[]): { valid: boolean; error?: string } {
     const {categories, universal_stats} = getLeaderboardPaths();
