@@ -1,6 +1,5 @@
 import {type Request, Router} from "express";
-import {z} from "zod";
-import {getCollectionNameFromValue, PlayersInformationKeySchema} from "../db/enums.js";
+import {getCollectionNameFromValue} from "../db/enums.js";
 import type {ParamsDictionary} from "express-serve-static-core";
 import {
     getLeaderboardPaths,
@@ -14,24 +13,9 @@ import {getDB} from "../db/connection.js";
 import {LeaderboardService} from "./leaderboard.service.js";
 import {validate} from "../middleware/validationMiddleware.js";
 import type {CachedResult} from "../types/common.types.js";
+import {type LeaderboardParams, LeaderboardParamsSchema, LeaderboardQuery} from "./leaderboard.routes.types.js";
 
 const router = Router();
-
-const LeaderboardParamsSchema = z.object({
-    stat: z.string(),
-    path: z.array(z.string()).default([]),
-})
-
-
-type LeaderboardParams = z.infer<typeof LeaderboardParamsSchema>;
-
-const LeaderboardQuery = z.object({
-    timeframe: PlayersInformationKeySchema,
-    // limit: z.coerce.number().int().min(1).max(50).optional().default(30),
-    // offset: z.coerce.number().int().nonnegative().optional().default(0)
-});
-
-type LeaderboardQuery = z.infer<typeof LeaderboardQuery>;
 
 // /api/leaderboards/kills/pvp/competitive/ctf
 // /api/leaderboards/flags-captured/pvp/competitive/ctf
