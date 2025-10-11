@@ -14,7 +14,7 @@ export class LeaderboardService {
     }
 
     private getCacheKey(path: string[], stat: string, cacheMappings: Record<string, string>): string {
-        let cacheKey = `leaderboards:${this.playerRepo.getCacheCollectionName()}:${path.join(":")}:${stat}`;
+        let cacheKey = `leaderboards:${this.playerRepo.getCacheCollectionName()}:${path.length > 0 ? path.join(":") + ":" : ""}${stat}`;
         for (const key in cacheMappings) {
             const value = cacheMappings[key];
             if (!value) {
