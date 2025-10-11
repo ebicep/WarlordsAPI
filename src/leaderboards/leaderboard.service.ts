@@ -93,7 +93,11 @@ export class LeaderboardService {
                 return [uuid, total];
             })
         );
-        let result: Map<any, number> = new Map([...mappedPlayers.entries()].sort((a, b) => b[1] - a[1]));
+        let result: Map<any, number> = new Map(
+            [...mappedPlayers.entries()]
+                .filter(([, value]) => value > 0)
+                .sort((a, b) => b[1] - a[1])
+        );
         console.log("Result:", result);
         return result;
     }
