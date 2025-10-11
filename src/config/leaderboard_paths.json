@@ -62,5 +62,15 @@
     "highest-wave-cleared": "highest_wave_cleared",
     "average-time-lived": "average_time_lived",
     "longest-time-lived": "longest_time_lived"
+  },
+  "cache_mappings": {
+    "flags-captured": "caps",
+    "flags-returned": "rets",
+    "clear-rate": "clear_rate",
+    "fastest-win": "fastest",
+    "highest-wave-cleared": "highest_cleared",
+    "average-time-lived": "avg_lived",
+    "longest-time-lived": "longest_lived",
+    "wave-defense": "wave-def"
   }
 }

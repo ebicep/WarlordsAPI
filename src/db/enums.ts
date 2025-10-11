@@ -1,6 +1,5 @@
 import {z} from "zod";
 
-
 export const Database = {
     Warlords: "Warlords",
 } as const;
@@ -28,6 +27,21 @@ function getCollectionNameFromKey(collection: keyof typeof PlayersInformationCol
             return "Players_Information_Daily";
         default:
             throw new Error("Invalid collection");
+    }
+}
+
+export function getKeyFromCollectionName(collectionName: string): keyof typeof PlayersInformationCollection {
+    switch (collectionName) {
+        case "Players_Information":
+            return PlayersInformationCollection.Lifetime;
+        case "Players_Information_Monthly":
+            return PlayersInformationCollection.Monthly;
+        case "Players_Information_Weekly":
+            return PlayersInformationCollection.Weekly;
+        case "Players_Information_Daily":
+            return PlayersInformationCollection.Daily;
+        default:
+            throw new Error("Invalid collection name");
     }
 }
 

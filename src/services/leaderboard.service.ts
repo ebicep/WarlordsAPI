@@ -2,8 +2,8 @@ import type {PlayerRepository} from "../respositories/player.repository.js";
 import {sumKeyAtPath} from "./leaderboard.utils.js";
 import {getLeaderboardPaths, getLeaderboardStatPaths, type LeaderboardStatPaths} from "../config/leaderboardPaths.js";
 import type {Document, WithId} from "mongodb";
-
-type SortedPlayerStats = Map<string, number>;
+import {CacheService} from "./cache.service.js";
+import type {SortedPlayerStats} from "../types/leaderboard.types.js";
 
 export class LeaderboardService {
 
@@ -13,9 +13,36 @@ export class LeaderboardService {
 
     }
 
+    private getCacheKey(path: string[], stat: string, cacheMappings: Record<string, string>): string {
+        let cacheKey = `leaderboards:${this.playerRepo.getCacheCollectionName()}:${path.join(":")}:${stat}`;
+        for (const key in cacheMappings) {
+            const value = cacheMappings[key];
+            if (!value) {
+                continue;
+            }
+            const regex = new RegExp(key, 'g');
+            cacheKey = cacheKey.replace(regex, value);
+        }
+        return cacheKey;
+    }
+
     async getLeaderboardStats(stat: string, path: string[]): Promise<SortedPlayerStats> {
         console.log("Getting leaderboard stats for stat:", stat, "- path:", path);
-        const {categories, universal_stats, mappings, stat_mappings} = getLeaderboardPaths();
+        const start = performance.now();
+        const {categories, universal_stats, mappings, stat_mappings, cache_mappings} = getLeaderboardPaths();
+        const cacheKey: string = this.getCacheKey(path, stat, cache_mappings);
+        let cacheService: CacheService = new CacheService();
+        let cacheResult: {} | null = await cacheService.get(cacheKey);
+        if (cacheResult) {
+            const end = performance.now();
+            console.log("Cache Hit for", cacheKey, "(took", (end - start).toFixed(2), "ms)");
+            return {
+                data: new Map(Object.entries(cacheResult as Record<string, number>)),
+                cached: true,
+                durationMs: end - start
+            };
+        }
+
         const leaderboardStatPaths: LeaderboardStatPaths = getLeaderboardStatPaths();
 
         const statPaths: string[] | undefined = universal_stats.includes(stat)
@@ -41,10 +68,18 @@ export class LeaderboardService {
         console.log("Path prefix:", statPathPrefix);
         console.log("Matching mapped stat paths:", matchingMappedStatPaths);
 
-        return this.getAllSortedStats(mappedStat, matchingMappedStatPaths);
+        let sortedStats: Map<string, number> = await this.getAllSortedStats(mappedStat, matchingMappedStatPaths);
+        await cacheService.set(cacheKey, JSON.stringify(Object.fromEntries(sortedStats)));
+        const end = performance.now();
+        console.log("Cache Miss for", cacheKey, "(took", (end - start).toFixed(2), "ms)");
+        return {
+            data: sortedStats,
+            cached: false,
+            durationMs: end - start
+        };
     }
 
-    private async getAllSortedStats(stat: string, mappedPaths: string[]): Promise<SortedPlayerStats> {
+    private async getAllSortedStats(stat: string, mappedPaths: string[]): Promise<Map<string, number>> {
         console.log("Calculating leaderboard for stat:", stat, "- paths:", mappedPaths);
         const allPlayers: WithId<Document>[] = await this.playerRepo.getAll();
         console.log("Fetched players:", allPlayers.length);

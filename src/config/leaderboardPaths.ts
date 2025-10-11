@@ -6,6 +6,7 @@ export interface LeaderboardPaths {
     timeframes: string[];
     mappings: Record<string, string>;
     stat_mappings: Record<string, string>;
+    cache_mappings: Record<string, string>;
 }
 
 export interface Categories {

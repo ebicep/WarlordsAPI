@@ -1,7 +1,5 @@
 import {getRedisClient} from "../cache/redis.js";
 
-// type CacheData = Record<string, number>
-
 export class CacheService {
 
     async get(key: string): Promise<{} | null> {
@@ -14,10 +12,10 @@ export class CacheService {
         }
     }
 
-    async set(key: string, value: string | number, expirySeconds: number = 300): Promise<boolean> {
+    async set(key: string, value: string | number, expirySeconds: number = 60 * 5): Promise<boolean> {
         try {
             const client = getRedisClient();
-            await client.set(key, value);
+            await client.set(key, value, "EX", expirySeconds);
             return true;
         } catch (error) {
             console.error("Cache set error for key ${key}:", error);
