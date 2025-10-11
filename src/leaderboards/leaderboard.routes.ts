@@ -13,7 +13,7 @@ import {getDB} from "../db/connection.js";
 import {LeaderboardService} from "./leaderboard.service.js";
 import {validate} from "../middleware/validationMiddleware.js";
 import type {CachedResult} from "../types/common.types.js";
-import {type LeaderboardParams, LeaderboardParamsSchema, LeaderboardQuery} from "./leaderboard.routes.types.js";
+import {type LeaderboardParams, LeaderboardParamsSchema, LeaderboardQuerySchema} from "./leaderboard.routes.types.js";
 
 const router = Router();
 
@@ -22,7 +22,7 @@ const router = Router();
 // /api/leaderboards/flags-captured/pvp/competitive
 // /api/leaderboards/flags-captured/pvp
 
-router.get("/leaderboards/paths", validate({query: LeaderboardQuery}), async (req, res) => {
+router.get("/leaderboards/paths", validate({query: LeaderboardQuerySchema}), async (req, res) => {
     let leaderboardPaths: LeaderboardPaths = getLeaderboardPaths();
     res.json({
         success: true,
@@ -30,7 +30,7 @@ router.get("/leaderboards/paths", validate({query: LeaderboardQuery}), async (re
     });
 });
 
-router.get("/leaderboards/stat-paths", validate({query: LeaderboardQuery}), async (req, res) => {
+router.get("/leaderboards/stat-paths", validate({query: LeaderboardQuerySchema}), async (req, res) => {
     let leaderboardStatPaths: LeaderboardStatPaths = getLeaderboardStatPaths();
     res.json({
         success: true,
@@ -40,17 +40,17 @@ router.get("/leaderboards/stat-paths", validate({query: LeaderboardQuery}), asyn
 
 router.get("/leaderboards/:stat", validate({
     params: LeaderboardParamsSchema,
-    query: LeaderboardQuery
+    query: LeaderboardQuerySchema
 }), handleLeaderboardStats);
 
 router.get("/leaderboards/:stat/*path", validate({
     params: LeaderboardParamsSchema,
-    query: LeaderboardQuery
+    query: LeaderboardQuerySchema
 }), handleLeaderboardStats);
 
-async function handleLeaderboardStats(req: Request<LeaderboardParams & ParamsDictionary, any, any, LeaderboardQuery>, res: any) {
+async function handleLeaderboardStats(req: Request<LeaderboardParams & ParamsDictionary, any, any, typeof LeaderboardParamsSchema>, res: any) {
     const {stat, path} = req.params;
-    const {timeframe} = req.query;
+    const {timeframe, limit} = LeaderboardQuerySchema.parse(req.query);
     const {valid, error} = validateLeaderboardPath(stat, path);
     if (!valid) {
         return res.status(400).json({success: false, error});
@@ -58,7 +58,7 @@ async function handleLeaderboardStats(req: Request<LeaderboardParams & ParamsDic
 
     const repository: PlayerRepository = new PlayerRepository(getDB(), getCollectionNameFromValue(timeframe));
     const service: LeaderboardService = new LeaderboardService(repository);
-    const result: CachedResult<Map<string, number>> = await service.getLeaderboardStats(stat, path);
+    const result: CachedResult<Map<string, number>> = await service.getLeaderboardStats(stat, path, limit);
 
     res.json({
         success: true,

@@ -26,8 +26,8 @@ export class LeaderboardService {
         return cacheKey;
     }
 
-    async getLeaderboardStats(stat: string, path: string[]): Promise<SortedPlayerStats> {
-        console.log("Getting leaderboard stats for stat:", stat, "- path:", path);
+    async getLeaderboardStats(stat: string, path: string[], limit: number): Promise<SortedPlayerStats> {
+        console.log("Getting leaderboard stats for stat:", stat, "- path:", path, "- limit:", limit);
         const start = performance.now();
         const {categories, universal_stats, mappings, stat_mappings, cache_mappings} = getLeaderboardPaths();
         const cacheKey: string = this.getCacheKey(path, stat, cache_mappings);
@@ -37,7 +37,7 @@ export class LeaderboardService {
             const end = performance.now();
             console.log("Cache Hit for", cacheKey, "(took", (end - start).toFixed(2), "ms)");
             return {
-                data: new Map(Object.entries(cacheResult as Record<string, number>)),
+                data: new Map(Array.from(new Map(Object.entries(cacheResult as Record<string, number>))).slice(0, limit)),
                 cached: true,
                 durationMs: end - start
             };
@@ -73,7 +73,7 @@ export class LeaderboardService {
         const end = performance.now();
         console.log("Cache Miss for", cacheKey, "(took", (end - start).toFixed(2), "ms)");
         return {
-            data: sortedStats,
+            data: new Map(Array.from(sortedStats).slice(0, limit)),
             cached: false,
             durationMs: end - start
         };
