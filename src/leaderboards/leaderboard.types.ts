@@ -1,3 +1,3 @@
-import type {CachedResult} from "./common.types.js";
+import type {CachedResult} from "../types/common.types.js";
 
 export type SortedPlayerStats = CachedResult<Map<string, number>>;

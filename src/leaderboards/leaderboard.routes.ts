@@ -11,7 +11,7 @@ import {
 import {collectArrays, navigateJson} from "../utils/utils.js";
 import {PlayerRepository} from "../respositories/player.repository.js";
 import {getDB} from "../db/connection.js";
-import {LeaderboardService} from "../services/leaderboard.service.js";
+import {LeaderboardService} from "./leaderboard.service.js";
 import {validate} from "../middleware/validationMiddleware.js";
 import type {CachedResult} from "../types/common.types.js";
 

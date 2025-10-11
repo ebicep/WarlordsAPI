@@ -1,4 +1,4 @@
-import {getRedisClient} from "../cache/redis.js";
+import {getRedisClient} from "./redis.js";
 
 export class CacheService {
 

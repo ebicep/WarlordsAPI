@@ -4,7 +4,7 @@ import {PlayersInformationCollection} from "../db/enums.js";
 import {getDB} from "../db/connection.js";
 import {z} from "zod";
 import {validate} from "../middleware/validationMiddleware.js";
-import {StatsService} from "../services/stats.service.js";
+import {StatsService} from "./stats.service.js";
 
 const router = Router();
 

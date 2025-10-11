@@ -2,8 +2,8 @@ import type {PlayerRepository} from "../respositories/player.repository.js";
 import {sumKeyAtPath} from "./leaderboard.utils.js";
 import {getLeaderboardPaths, getLeaderboardStatPaths, type LeaderboardStatPaths} from "../config/leaderboardPaths.js";
 import type {Document, WithId} from "mongodb";
-import {CacheService} from "./cache.service.js";
-import type {SortedPlayerStats} from "../types/leaderboard.types.js";
+import {CacheService} from "../cache/cache.service.js";
+import type {SortedPlayerStats} from "./leaderboard.types.js";
 
 export class LeaderboardService {
 

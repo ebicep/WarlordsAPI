@@ -1,6 +1,6 @@
 import express, {type ErrorRequestHandler} from "express";
-import stats from "./routes/stats.routes.js";
-import leaderboards from "./routes/leaderboard.routes.js";
+import stats from "./stats/stats.routes.js";
+import leaderboards from "./leaderboards/leaderboard.routes.js";
 import {connectMongo} from "./db/connection.js";
 import {connectRedis} from "./cache/redis.js";
 
