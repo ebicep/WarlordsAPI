@@ -2,5 +2,5 @@
   "watch": ["src"],
   "ext": "ts,json",
   "ignore": ["dist"],
-  "exec": "node --loader ts-node/esm ./src/server.ts"
+  "exec": "node --import ./register.js ./src/server.ts"
 }

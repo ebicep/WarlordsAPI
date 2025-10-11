@@ -4,7 +4,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "nodemon",
-    "start": "node ./dist/server.js"
+    "start": "node --import ./register.js ./src/server.ts"
   },
   "type": "module",
   "keywords": [],
