@@ -12,8 +12,13 @@ import {PlayerRepository} from "../respositories/player.repository.js";
 import {getDB} from "../db/connection.js";
 import {LeaderboardService} from "./leaderboard.service.js";
 import {validate} from "../middleware/validationMiddleware.js";
-import type {CachedResult} from "../types/common.types.js";
-import {type LeaderboardParams, LeaderboardParamsSchema, LeaderboardQuerySchema} from "./leaderboard.routes.types.js";
+import type {CachedResult, Result} from "../types/common.types.js";
+import {
+    type LeaderboardParams,
+    LeaderboardParamsSchema,
+    type LeaderboardQuery,
+    LeaderboardQuerySchema
+} from "./leaderboard.routes.types.js";
 
 const router = Router();
 
@@ -48,27 +53,46 @@ router.get("/leaderboards/:stat/*path", validate({
     query: LeaderboardQuerySchema
 }), handleLeaderboardStats);
 
-async function handleLeaderboardStats(req: Request<LeaderboardParams & ParamsDictionary, any, any, typeof LeaderboardParamsSchema>, res: any) {
-    const {stat, path} = req.params;
-    const {timeframe, limit} = LeaderboardQuerySchema.parse(req.query);
+export async function handleLeaderboardStats(req: Request<LeaderboardParams & ParamsDictionary, any, any, typeof LeaderboardParamsSchema>, res: any) {
+    const params: LeaderboardParams = {
+        stat: req.params.stat,
+        path: req.params.path
+    };
+    const query: LeaderboardQuery = LeaderboardQuerySchema.parse(req.query);
+    const result = await getLeaderboardStats(params, query);
+
+    if (!result.success) {
+        return res.status(400).json(result);
+    }
+
+    res.json(result);
+}
+
+export async function getLeaderboardStats(
+    params: LeaderboardParams,
+    query: LeaderboardQuery
+): Promise<Result> {
+    const {stat, path} = params;
+    const {timeframe, limit} = query;
+
     const {valid, error} = validateLeaderboardPath(stat, path);
     if (!valid) {
-        return res.status(400).json({success: false, error});
+        return {success: false, error: error ?? "Invalid path or stat"};
     }
 
     const repository: PlayerRepository = new PlayerRepository(getDB(), getCollectionNameFromValue(timeframe));
     const service: LeaderboardService = new LeaderboardService(repository);
     const result: CachedResult<Map<string, number>> = await service.getLeaderboardStats(stat, path, limit);
 
-    res.json({
+    return {
         success: true,
         data: Object.fromEntries(result.data),
         cached: result.cached,
         durationMs: result.durationMs
-    });
+    };
 }
 
-function validateLeaderboardPath(stat: string, path: string[]): { valid: boolean; error?: string } {
+export function validateLeaderboardPath(stat: string, path: string[]): { valid: boolean; error?: string } {
     const {categories, universal_stats} = getLeaderboardPaths();
     const validObject = navigateJson(categories, path);
     if (!validObject) {
