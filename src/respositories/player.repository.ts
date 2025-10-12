@@ -21,8 +21,21 @@ export class PlayerRepository {
         return this.db.collection(this.collection).findOne({uuid: binaryUUID});
     }
 
-    async getAll(): Promise<WithId<Document>[]> {
-        return this.db.collection(this.collection).find().toArray();
+    async getAll(mappedPaths: string[]): Promise<WithId<Document>[]> {
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 2);
+
+        const baseFields = ["_id", "uuid"];
+        const includeFields = [...new Set([...baseFields, ...mappedPaths])];
+        const projection = {
+            ...Object.fromEntries(includeFields.map(f => [f, 1]))
+        };
+        return this.db.collection(this.collection)
+            .find(
+                {last_login: {$gte: oneYearAgo}},
+                {projection: projection}
+            )
+            .toArray();
     }
 
 }

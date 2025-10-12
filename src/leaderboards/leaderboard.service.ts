@@ -80,9 +80,11 @@ export class LeaderboardService {
     }
 
     private async getAllSortedStats(stat: string, mappedPaths: string[]): Promise<Map<string, number>> {
+        // const memoryBefore = process.memoryUsage().heapUsed;
         console.log("Calculating leaderboard for stat:", stat, "- paths:", mappedPaths);
-        const allPlayers: WithId<Document>[] = await this.playerRepo.getAll();
+        const allPlayers: WithId<Document>[] = await this.playerRepo.getAll(mappedPaths);
         console.log("Fetched players:", allPlayers.length);
+        const memoryAfter = process.memoryUsage().heapUsed;
         const mappedPlayers: Map<any, number> = new Map(
             allPlayers.map(player => {
                 const uuid = player.uuid.toString();
