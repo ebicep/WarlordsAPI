@@ -21,7 +21,6 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@vercel/node": "^5.3.26",
     "compression": "^1.8.1",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
