@@ -59,7 +59,7 @@ export async function handleLeaderboardStats(req: Request<LeaderboardParams & Pa
         path: req.params.path
     };
     const query: LeaderboardQuery = LeaderboardQuerySchema.parse(req.query);
-    const result = await getLeaderboardStats(params, query);
+    const result: Result = await getLeaderboardStats(params, query);
 
     if (!result.success) {
         return res.status(400).json(result);

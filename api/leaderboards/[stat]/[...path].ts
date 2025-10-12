@@ -9,6 +9,7 @@ import {
 } from "../../../src/leaderboards/leaderboard.routes.types.js";
 import {getLeaderboardStats} from "../../../src/leaderboards/leaderboard.routes.js";
 import {z} from "zod";
+import type {Result} from "../../../src/types/common.types.js";
 
 function extractVercelParams(req: VercelRequest): { stat: string; path: string } {
     const stat = req.query.stat as string;
@@ -50,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const params: LeaderboardParams = LeaderboardParamsSchema.parse({stat, path});
         const query: LeaderboardQuery = LeaderboardQuerySchema.parse(req.query);
 
-        const result: {} = await getLeaderboardStats(params, query);
+        const result: Result = await getLeaderboardStats(params, query);
 
         if (!result.success) {
             return res.status(400).json(result);
